@@ -51,7 +51,7 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
     }
 
     private Set<String> runIteration(NonBlockingHashMapLong<String> map) throws Exception {
-        List<Callable<String>> tasks = new ArrayList<Callable<String>>();
+        List<Callable<String>> tasks = new ArrayList<Callable<String>>(N_THREADS);
         for (int i = 1; i <= N_THREADS; i++) {
             tasks.add(new PutIfAbsent(map, "worker #" + i));
         }
@@ -62,7 +62,7 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
     }
 
     private List<String> executeTasks(List<Callable<String>> tasks) throws Exception {
-        List<Future<String>> futures = new ArrayList<Future<String>>();
+        List<Future<String>> futures = new ArrayList<Future<String>>(N_THREADS);
         final CountDownLatch startLatch = new CountDownLatch(N_THREADS + 1);
         for (Callable<String> t : tasks) {
             final Callable<String> task = t;
@@ -79,7 +79,7 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
 
         startLatch.countDown();
 
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<String>(N_THREADS);
         for (Future<String> f : futures) {
             results.add(f.get());
         }
