@@ -28,28 +28,6 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
         }
     }
 
-    public void test_zero_key_assigned() throws Exception {
-        for (int i = 0; i < ITERATIONS; i++) {
-            NonBlockingHashMapLong<String> map = new NonBlockingHashMapLong<String>();
-            map.put(0, "Initial value");
-
-            Set<String> results = runIteration(map);
-            assertEquals(Collections.singleton("Initial value"), results);
-        }
-    }
-
-    public void test_other_keys_assigned() throws Exception {
-        for (int i = 0; i < ITERATIONS; i++) {
-            NonBlockingHashMapLong<String> map = new NonBlockingHashMapLong<String>();
-            map.put(Long.MIN_VALUE, "abc");
-            map.put(Long.MAX_VALUE, "xyz");
-            map.put(123, "123");
-
-            Set<String> results = runIteration(map);
-            assertEquals(results.toString(), 1, results.size());
-        }
-    }
-
     private Set<String> runIteration(NonBlockingHashMapLong<String> map) throws Exception {
         List<Callable<String>> tasks = new ArrayList<Callable<String>>(N_THREADS);
         for (int i = 1; i <= N_THREADS; i++) {
