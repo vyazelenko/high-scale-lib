@@ -3,7 +3,10 @@ package org.cliffc.high_scale_lib.non_blocking_hashmap;
 import junit.framework.TestCase;
 import org.cliffc.high_scale_lib.NonBlockingHashMapLong;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends TestCase {
@@ -21,17 +24,25 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
     }
 
 
-    public void test_empty_map() throws Exception {
+    public void test_empty_map_key_0() throws Exception {
+        empty_map_test(0);
+    }
+
+    public void test_empty_map_key_123() throws Exception {
+        empty_map_test(123);
+    }
+
+    private void empty_map_test(long key) throws Exception {
         for (int i = 0; i < ITERATIONS; i++) {
-            Set<String> results = runIteration(new NonBlockingHashMapLong<String>());
+            Set<String> results = runIteration(new NonBlockingHashMapLong<String>(), key);
             assertEquals(results.toString(), 1, results.size());
         }
     }
 
-    private Set<String> runIteration(NonBlockingHashMapLong<String> map) throws Exception {
+    private Set<String> runIteration(NonBlockingHashMapLong<String> map, long key) throws Exception {
         List<Callable<String>> tasks = new ArrayList<Callable<String>>(N_THREADS);
         for (int i = 1; i <= N_THREADS; i++) {
-            tasks.add(new PutIfAbsent(map, "worker #" + i));
+            tasks.add(new PutIfAbsent(map, key, "worker #" + i));
         }
 
         List<String> results = executeTasks(tasks);
@@ -67,18 +78,20 @@ public class NonBlockingHashMapLongZeroKeyConcurrentGetPutIfAbsentTest extends T
     private static class PutIfAbsent implements Callable<String> {
         private final NonBlockingHashMapLong<String> map;
         private final String newValue;
+        private final long key;
 
-        public PutIfAbsent(NonBlockingHashMapLong<String> map, String newValue) {
+        public PutIfAbsent(NonBlockingHashMapLong<String> map, long key, String newValue) {
             this.map = map;
             this.newValue = newValue;
+            this.key = key;
         }
 
         @Override
         public String call() throws Exception {
-            String value = map.get(0);
+            String value = map.get(key);
             if (value == null) {
                 value = newValue;
-                String tmp = map.putIfAbsent(0, value);
+                String tmp = map.putIfAbsent(key, value);
                 if (tmp != null) {
                     return tmp;
                 }
